@@ -1,5 +1,9 @@
 #include"string.h"
 
+void test()
+{
+    std::cout<<"test gie"<<std::endl;
+}
 void stringtest1()
 {
 
