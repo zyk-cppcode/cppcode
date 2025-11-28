@@ -6,19 +6,44 @@
 const size_t string::npos = -1;
 
 // 一、构造、析构与拷贝控制
-string::string() {}
+string::string() {
+    _data=new char[1];
+    _size=0;
+    _capacity=0;
+    _data[0]='\0';
+}
 
-string::string(const char* cstr) {}
+string::string(const char* cstr) {
+    int size=strlen(cstr);
+    _data=new char[size+1];
+    _size=size;
+    _capacity=size+1;
+    strcpy(_data,cstr);
+}
 
-string::string(const string& other) {}
+string::string(const string& other) {
+    _data=new char[other._capacity];
+    _size=other._size;
+    _capacity=other._capacity;
+    strcpy(_data,other._data);
+}
 
-string::string(string&& other) noexcept {}
+//string::string(string&& other) noexcept {}
 
-string& string::operator=(const string& other) {}
+string& string::operator=(const string& other) {
+    delete[] _data;
+    _data =new char[other._capacity];
+    _size=other._size;
+    _capacity=other._capacity;
+    strcpy(_data,other._data);
 
-string& string::operator=(string&& other) noexcept {}
+}
 
-string::~string() {}
+//string& string::operator=(string&& other) noexcept {}
+
+string::~string() {
+    delete[] _data;
+}
 
 // 二、元素访问
 char& string::operator[](size_t idx) {}
@@ -87,7 +112,11 @@ string& string::replace(size_t pos, size_t len, const string& other) {}
 
 string& string::replace(size_t pos, size_t len, size_t n, char ch) {}
 
-void string::swap(string& other) noexcept {}
+void string::swap(string& other) noexcept {
+    std::swap(_data,other._data);
+    std::swap(_size,other._size);
+    std::swap(_capacity,other._capacity);
+}
 
 // 五、查找与比较
 size_t string::find(const char* cstr, size_t pos) const {}

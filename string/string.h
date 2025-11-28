@@ -1,17 +1,20 @@
+#pragma once
 #include<iostream>
+#include<string.h>
 class string{
 public:
  
     // 静态常量（表示“未找到”）
     static const size_t npos;
-
+    //友元
+    friend std::ostream& operator<<(std::ostream& out,const string& s);
     // 一、构造、析构与拷贝控制
     string();                                  // 默认构造
     string(const char* cstr);                  // C风格字符串构造
     string(const string& other);               // 拷贝构造（深拷贝）
-    string(string&& other) noexcept;           // 移动构造（C++11+）
+    //string(string&& other) noexcept;           // 移动构造（C++11+）
     string& operator=(const string& other);    // 拷贝赋值（深拷贝）
-    string& operator=(string&& other) noexcept;// 移动赋值（C++11+）
+    //string& operator=(string&& other) noexcept;// 移动赋值（C++11+）
     ~string();                                 // 析构函数
 
     // 二、元素访问
@@ -90,3 +93,10 @@ string operator+(const char* lhs, const string& rhs);
 string operator+(const string& lhs, const string& rhs);
 string operator+(const string& lhs, char rhs);
 string operator+(char lhs, const string& rhs);
+inline std::ostream& operator<<(std::ostream& out,const string& s){
+    for(int i=0;i<s._size;i++)
+    {
+        std::cout<<s._data[i];
+    }
+    return out;
+}
