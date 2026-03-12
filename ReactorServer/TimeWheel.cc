@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <memory>
 #include <functional>
-#include<unistd.h>
+#include <unistd.h>
 
 using TaskFunc = std::function<void()>;
 using ReleaseFunc = std::function<void()>;
@@ -20,9 +20,9 @@ public:
     }
     ~TimeTask()
     {
-        if(!_canceled)
+        if (!_canceled)
         {
-             _cbtask();
+            _cbtask();
         }
         _release();
     }
@@ -64,10 +64,8 @@ public:
         int pos = (_tick + delay) % _capacity;
 
         _wheel[pos].push_back(pt);
-        
-        _timers[id] = WeakTask(pt);
-     
 
+        _timers[id] = WeakTask(pt);
     }
     // 刷新/延迟定时任务
     void TimerRefresh(uint64_t id)
@@ -83,13 +81,16 @@ public:
         int pos = (_tick + delay) % _capacity;
         _wheel[pos].push_back(pt);
     }
-    void TimerCancel(uint64_t id) {
+    void TimerCancel(uint64_t id)
+    {
         auto it = _timers.find(id);
-        if (it == _timers.end()) {
-            return;//没找着定时任务，没法刷新，没法延迟
+        if (it == _timers.end())
+        {
+            return; // 没找着定时任务，没法刷新，没法延迟
         }
         Taskptr pt = it->second.lock();
-        if (pt) pt->Cancel();
+        if (pt)
+            pt->Cancel();
     }
     // 秒针滴答
     void RunTimerTask()
@@ -100,21 +101,20 @@ public:
     ~TimeWheel() {}
 
 private:
-    
-    int _tick;                                      // 秒针，释放位置
-    int _capacity;                                  // wheel容量
+    int _tick;     // 秒针，释放位置
+    int _capacity; // wheel容量
     std::vector<std::vector<Taskptr>> _wheel;
     std::unordered_map<uint64_t, WeakTask> _timers; // 存储任务
 };
 void Test()
 {
-    
+
     std::cout << "test" << std::endl;
 }
 int main()
 {
     TimeWheel tw;
-    
+
     tw.TimerAdd(1, 5, Test);
     tw.TimerAdd(2, 10, Test);
     tw.TimerCancel(1);
