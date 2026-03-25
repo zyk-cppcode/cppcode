@@ -11,7 +11,7 @@
 #include <unistd.h>
 //
 #include "spdlog/spdlog.h"
-
+#include "logger.hpp"
 class Socket {
 public:
   Socket() : _sockfd(-1) {}
@@ -75,14 +75,29 @@ public:
   // 获取新连接
   int Accept() {
     int newfd = ::accept(_sockfd, NULL, NULL);
-    if (newfd < 0) {
-      spdlog::error("accept error");
-      return -1;
-    }
-    spdlog::info("socket accept success");
+    if(newfd >= 0)
+        {
+            LOG(LogLevel::INFO) << "新客户端连接，fd=" << newfd;
+            return newfd;
+        }
 
-    return newfd;
-  }
+        // 这两个不是错误！是非阻塞正常返回！
+        if(errno == EAGAIN || errno == EWOULDBLOCK)
+        {
+            // 没有新连接，直接返回继续轮询
+            return -1;
+        }
+        LOG(LogLevel::ERROR) << "accept failed errno=" << errno;
+        return -1;
+    }
+    // if (newfd < 0) {
+    //   spdlog::error("accept error");
+    //   return -1;
+    // }
+    // spdlog::info("socket accept success");
+
+    // return newfd;
+  
   // 创建服务器套接字
   bool CreateServer(uint16_t port, const char *ip = "0.0.0.0") {
     if (!Create()) { // 1. 创建socket
