@@ -1,12 +1,14 @@
-#include "../Socket.hpp"
+#include "../source/Socket.hpp"
 #include <iostream>
+#include <cstring>
+#include <unistd.h>
 
 int main() {
   Socket cli_sock;
-  cli_sock.CreateClient(8500, "127.0.0.1");
-  for (int i = 0; i < 5; i++) {
+  cli_sock.CreateClient(8888, "127.0.0.1");
+  while(1){
     const char *str = "hello zyk!";
-    cli_sock.Send(str, strlen(str));  // 正确，直接传字符串指针和长度
+    cli_sock.Send(str, strlen(str));  
     char buf[1024] = {0};
     cli_sock.Recv(buf, 1023);
     // spdlog::info("Received: {}", buf);

@@ -1,7 +1,23 @@
-all:client server
-client:client.cc
-	g++ -o client client.cc -I.. -I../spdlog -pthread
-server:server.cc
-	g++ -o server server.cc -I.. -I../spdlog -pthread
+# test/Makefile
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -I../ -I../spdlog
+LDFLAGS = -pthread
+
+# 源文件列表
+SRC_COMMON = ../source/Buffer.cc \
+             ../source/Channel.cc \
+             ../source/Poller.cc \
+             ../source/Socket.cc
+
+all: server client
+
+# 编译 server
+server: server.cc $(SRC_COMMON)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+# 编译 client
+client: client.cc ../source/Socket.cc
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
 clean:
-	rm -rf client server
+	rm -f server client

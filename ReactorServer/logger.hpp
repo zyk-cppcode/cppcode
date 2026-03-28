@@ -20,7 +20,7 @@ enum class LogLevel
     FATAL
 };
 
-std::string Level2String(LogLevel level)
+inline std::string Level2String(LogLevel level)
 {
     switch (level)
     {
@@ -40,7 +40,7 @@ std::string Level2String(LogLevel level)
 }
 
 // 20XX-08-04 12:27:03
-std::string GetCurrentTime()
+inline std::string GetCurrentTime()
 {
     // 1. 获取时间戳
     time_t currtime = time(nullptr);
@@ -223,7 +223,7 @@ private:
     std::unique_ptr<LogStrategy> _strategy;
 };
 
-Logger logger;
+inline Logger logger;
 
 #define LOG(level) logger(level, __FILE__, __LINE__)
 #define EnableConsoleLogStrategy() logger.EnableConsoleLogStrategy()
