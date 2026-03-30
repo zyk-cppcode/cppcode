@@ -1,10 +1,10 @@
 #include "Poller.hpp"
-#include "Channel.hpp"   
 #include "../logger.hpp"
-#include <string.h>
+#include "Channel.hpp"
 #include <assert.h>
-#include <stdlib.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <string.h>
 
 Poller::Poller() {
   _epfd = epoll_create(1);
@@ -13,8 +13,9 @@ Poller::Poller() {
     LOG(LogLevel::ERROR) << "epoll create error";
     abort();
   }
+  LOG(LogLevel::DEBUG) << "epoll create success!";
 }
-
+// 更新Channel的事件
 void Poller::UpdateChannel(Channel *channel) {
   bool ret = FindChannel(channel);
   if (ret == false) {
@@ -24,7 +25,7 @@ void Poller::UpdateChannel(Channel *channel) {
     Update(channel, EPOLL_CTL_MOD);
   }
 }
-
+// 从Poller中移除Channel
 void Poller::RemoveChannel(Channel *channel) {
   bool ret = FindChannel(channel);
   if (ret == true) {
@@ -32,11 +33,12 @@ void Poller::RemoveChannel(Channel *channel) {
     _channels.erase(channel->Fd());
   }
 }
-
-void Poller::poll(std::vector<Channel*> &active) {
+// 等待事件发生并处理
+void Poller::Poll(std::vector<Channel *> &active) {
   int ret = epoll_wait(_epfd, _evs.data(), _evs.size(), -1);
   if (ret < 0) {
-    if (errno == EINTR) return;
+    if (errno == EINTR)
+      return;
     LOG(LogLevel::ERROR) << "epoll wait error:" << strerror(errno);
     abort();
   }
@@ -48,18 +50,20 @@ void Poller::poll(std::vector<Channel*> &active) {
     active.push_back(it->second);
   }
 }
-
+// 更新Channel的事件
 void Poller::Update(Channel *channel, int op) {
   struct epoll_event event;
   int fd = channel->Fd();
   event.data.fd = fd;
   event.events = channel->GetEvents();
   int ret = epoll_ctl(_epfd, op, fd, &event);
-  if (ret == -1) {
-    LOG(LogLevel::ERROR) << "epoll_ctl failed:" << strerror(errno);
+  if (ret < 0) {
+    LOG(LogLevel::ERROR) << "epoll_ctl failed, op=" << op << ", fd=" << fd
+                         << ", errno=" << errno << " (" << strerror(errno)
+                         << ")";
   }
 }
-
+// 查找Channel是否存在
 bool Poller::FindChannel(Channel *channel) {
   int fd = channel->Fd();
   auto pos = _channels.find(fd);
