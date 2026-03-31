@@ -32,6 +32,10 @@ void Poller::RemoveChannel(Channel *channel) {
     Update(channel, EPOLL_CTL_DEL);
     _channels.erase(channel->Fd());
   }
+  else
+  {
+    LOG(LogLevel::WARNING) << "RemoveChannel: Channel not found in _channels";
+  }
 }
 // 等待事件发生并处理
 void Poller::Poll(std::vector<Channel *> &active) {
@@ -52,15 +56,21 @@ void Poller::Poll(std::vector<Channel *> &active) {
 }
 // 更新Channel的事件
 void Poller::Update(Channel *channel, int op) {
+  if (!channel || channel->Fd() < 0) {
+    return;
+  }
   struct epoll_event event;
   int fd = channel->Fd();
   event.data.fd = fd;
   event.events = channel->GetEvents();
+
   int ret = epoll_ctl(_epfd, op, fd, &event);
   if (ret < 0) {
+    
     LOG(LogLevel::ERROR) << "epoll_ctl failed, op=" << op << ", fd=" << fd
                          << ", errno=" << errno << " (" << strerror(errno)
                          << ")";
+    return;
   }
 }
 // 查找Channel是否存在

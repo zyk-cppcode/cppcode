@@ -5,12 +5,11 @@
 #include "../source/Poller.hpp"
 #include "../source/Socket.hpp"
 #include "../logger.hpp"
-
+#include "../source/EventLoop.hpp"
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <vector>
 #include <functional>
 
 
@@ -18,11 +17,17 @@ void HandleClose(Channel *channel) {
   std::cout << "close fd: " << channel->Fd() << std::endl;
   channel->Remove();   // 先从epoll移除
   close(channel->Fd());     // 关闭fd
-  delete channel;           // 释放channel
+  //delete channel;           // 释放channel
+  channel->GetLoop()->QueueInLoop([channel]() {
+        delete channel;
+    });
 }
 
 void HandleRead(Channel *channel) {
+
   int fd = channel->Fd();
+  if(fd<0)
+  return;
   char buf[1024] = {0};
   ssize_t ret = recv(fd, buf, 1023, 0);
 
@@ -62,14 +67,14 @@ void HandleEvent(Channel *channel) {
 // ==============================
 // 新连接回调
 // ==============================
-void Acceptor(Poller *poller, Channel *lst_channel) {
+void Acceptor(EventLoop*loop, Channel *lst_channel) {
   int listen_fd = lst_channel->Fd();
   int newfd = accept(listen_fd, nullptr, nullptr);
   if (newfd < 0) return;
 
   std::cout << "新连接：" << newfd << std::endl;
 
-  Channel *channel = new Channel(poller, newfd);
+  Channel *channel = new Channel(loop, newfd);
   channel->SetReadCallBack(std::bind(HandleRead, channel));
   channel->SetWriteCallBack(std::bind(HandleWrite, channel));
   channel->SetCloseCallBack(std::bind(HandleClose, channel));
@@ -81,23 +86,20 @@ void Acceptor(Poller *poller, Channel *lst_channel) {
 int main() {
   EnableConsoleLogStrategy();
   std::cout << "========= 服务器启动 ==========" << std::endl;
-  Poller poller;
+  EventLoop loop;
   Socket lst_sock;
   lst_sock.CreateServer(8888);
   std::cout << "===================" << std::endl;
 
-  Channel channel(&poller, lst_sock.Fd());
-  channel.SetReadCallBack(std::bind(Acceptor, &poller, &channel));
+  Channel channel(&loop, lst_sock.Fd());
+  channel.SetReadCallBack(std::bind(Acceptor, &loop, &channel));
   channel.EnableRead();
   
 
   while (1) {
-    std::vector<Channel *> actives;
-    poller.Poll(actives);
+  std::cout << "=========inloop==========" << std::endl;
 
-    for (auto &ch : actives) {
-      ch->HandleEvent();   // 正确处理事件
-    }
+    loop.Loop();
   }
 
   return 0;

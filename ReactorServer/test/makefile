@@ -7,7 +7,8 @@ LDFLAGS = -pthread
 SRC_COMMON = ../source/Buffer.cc \
              ../source/Channel.cc \
              ../source/Poller.cc \
-             ../source/Socket.cc
+             ../source/Socket.cc \
+			 ../source/EventLoop.cc
 
 all: server client
 

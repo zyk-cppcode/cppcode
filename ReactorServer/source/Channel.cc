@@ -1,9 +1,10 @@
 #include "Channel.hpp"
 #include "../logger.hpp"
 #include "Poller.hpp"
+#include "EventLoop.hpp"
 
-Channel::Channel(Poller *poller, int fd)
-    : _fd(fd), _events(0), _revents(0), _poller(poller) {
+Channel::Channel(EventLoop *evlp, int fd)
+    : _fd(fd), _events(0), _revents(0), _evlp(evlp) {
   LOG(LogLevel::DEBUG) << "epoll create success!";
 }
 
@@ -62,10 +63,11 @@ void Channel::DisableAll() {
 // 移除当前连接
 void Channel::Remove() {
   DisableAll();
-  _poller->RemoveChannel(this);
+  _evlp->RemoveEvent(this);
+  _fd=-1;
 }
 // 更新当前连接的事件
-void Channel::Update() { _poller->UpdateChannel(this); }
+void Channel::Update() { _evlp->UpdateEvent(this); }
 // 处理事件
 void Channel::HandleEvent() {
   if (_revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {

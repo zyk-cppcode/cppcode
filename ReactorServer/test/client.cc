@@ -30,14 +30,14 @@ int main() {
   std::cout << recv_len << std::endl;
         if (recv_len <= 0) {
             std::cout << "接收失败，连接断开！" << std::endl;
-            break;
+           break;
         }
 
 
         std::cout << "Received: " << buf << std::endl;
         sleep(1);
     }
-  std::cout << "=1==================" << std::endl;
+  //std::cout << "=1==================" << std::endl;
 
     return 0;
 }

@@ -22,7 +22,7 @@ void EventLoop::ReadEventfd() {
 }
 EventLoop::EventLoop()
     : _tid(std::this_thread::get_id()), _event_fd(CreateEventFd()),
-      _exit(false), _event_channel(new Channel(&_poller, _event_fd)) {
+       _event_channel(new Channel(this, _event_fd)),_exit(false) {
   _event_channel->SetReadCallBack(std::bind(&EventLoop::ReadEventfd, this));
   _event_channel->EnableRead();
 }

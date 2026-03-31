@@ -4,14 +4,14 @@
 #include <functional>
 #include <sys/epoll.h>
 
-
+class EventLoop;
 class Poller;
 
 using EventCallBack = std::function<void()>;
 
 class Channel {
 public:
-  Channel(Poller* poller, int fd);
+  Channel(EventLoop *evlp, int fd);
   ~Channel();
 // 获取文件描述符
   int Fd();
@@ -49,12 +49,15 @@ public:
   void HandleEvent();
   //更新
   void Update();
+  EventLoop* GetLoop(
+
+  ){return _evlp;}
 private:
   int _fd;
   uint32_t _events;// 当前需要监控的事件
   uint32_t _revents;// 当前连接触发的事件
 
-  Poller* _poller;
+  EventLoop* _evlp;
 
   EventCallBack _read_callback;//可读事件被触发的回调函数
   EventCallBack _write_callback;//可写事件被触发的回调函数
