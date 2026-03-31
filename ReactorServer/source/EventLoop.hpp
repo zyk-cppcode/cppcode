@@ -2,6 +2,7 @@
 #include "../logger.hpp"
 #include "Poller.hpp"
 #include <functional>
+#include <memory>
 #include <sys/eventfd.h>
 #include <mutex>
 #include <thread>
@@ -22,12 +23,12 @@ public:
   void RemoveEvent(Channel *channel); // 移除描述符的监控
 public:
   int CreateEventFd();//创建 eventfd
-  void WakeEventfd();
+  void ReadEventfd();//读 eventfd，唤醒
   private:
   std::thread::id _tid; // 线程 Id，判断是否本线程
   Poller _poller;       // 监控 channel
   int _event_fd;
-  Channel _event_channel;
+  std::unique_ptr<Channel> _event_channel;
   std::vector<Functor> _tasks; // 任务队列
   bool _exit;                  // 判断是否退出
   std::mutex _mutex;

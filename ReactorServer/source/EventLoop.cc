@@ -1,16 +1,30 @@
 #include "EventLoop.hpp"
+#include "../logger.hpp"
+
 #include <cerrno>
 #include <cstdint>
 #include <cstdlib>
 #include <thread>
 #include <unistd.h>
 
-void EventLoop::WakeEventfd() {}
+void EventLoop::ReadEventfd() {
+  uint64_t val;
+ int res =read(_event_fd, &val, sizeof(val));
+ if(res<0)
+ {
+  if(errno==EINTR)
+  {
+    return;
+  }
+  //LOG(LogLevel::ERROR)<<"ReadEventfd failed!";
+
+ }
+}
 EventLoop::EventLoop()
     : _tid(std::this_thread::get_id()), _event_fd(CreateEventFd()),
-      _exit(false), _event_channel(&_poller, _event_fd) {
-  _event_channel.SetReadCallBack(std::bind(&EventLoop::WakeEventfd, this));
-  _event_channel.EnableRead();
+      _exit(false), _event_channel(new Channel(&_poller, _event_fd)) {
+  _event_channel->SetReadCallBack(std::bind(&EventLoop::ReadEventfd, this));
+  _event_channel->EnableRead();
 }
 EventLoop::~EventLoop() {}
 // 创建 eventfd
@@ -24,7 +38,7 @@ int EventLoop::CreateEventFd() {
 }
 // 事件监控->>就绪事件处理->>执行任务
 void EventLoop::Loop() {
-  while (1) {
+  while (!_exit) {
     std::vector<Channel *> actives;
     _poller.Poll(actives);
     for (auto a : actives) {
@@ -40,7 +54,7 @@ void EventLoop::Wakeup() {
   uint64_t val = 1;
   int res = write(_event_fd, &val, sizeof(val));
   if (res < 0) {
-    if (errno = EINTR) {
+    if (errno == EINTR) {
       return;
     }
     LOG(LogLevel::ERROR) << "Wakeup eventfd failed";
