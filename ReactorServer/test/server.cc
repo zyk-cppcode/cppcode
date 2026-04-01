@@ -59,9 +59,9 @@ void HandleError(Channel *channel) {
   HandleClose(channel);
 }
 
-void HandleEvent(Channel *channel) {
-  int fd = channel->Fd();
-  std::cout << "fd=" << fd << " 事件触发" << std::endl;
+void HandleEvent(EventLoop*loop,Channel *channel,int id) {
+  loop->TimerRefresh(id);
+  
 }
 
 // ==============================
@@ -71,7 +71,7 @@ void Acceptor(EventLoop*loop, Channel *lst_channel) {
   int listen_fd = lst_channel->Fd();
   int newfd = accept(listen_fd, nullptr, nullptr);
   if (newfd < 0) return;
-
+  int id=rand();
   std::cout << "新连接：" << newfd << std::endl;
 
   Channel *channel = new Channel(loop, newfd);
@@ -79,8 +79,9 @@ void Acceptor(EventLoop*loop, Channel *lst_channel) {
   channel->SetWriteCallBack(std::bind(HandleWrite, channel));
   channel->SetCloseCallBack(std::bind(HandleClose, channel));
   channel->SetErrorCallBack(std::bind(HandleError, channel));
-  channel->SetEventCallBack(std::bind(HandleEvent, channel));
+  channel->SetEventCallBack(std::bind(HandleEvent, loop,channel,id));
   channel->EnableRead();
+  loop->TimerAdd(id, 10, std::bind(HandleClose, channel));
 }
 
 int main() {
@@ -95,7 +96,6 @@ int main() {
   channel.SetReadCallBack(std::bind(Acceptor, &loop, &channel));
   channel.EnableRead();
   
-
   while (1) {
   std::cout << "=========inloop==========" << std::endl;
 

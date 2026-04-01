@@ -1,28 +1,29 @@
 #include "EventLoop.hpp"
 #include "../logger.hpp"
+#include "Channel.hpp"
+#include "TimeWheel.hpp"
 
 #include <cerrno>
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 #include <thread>
 #include <unistd.h>
 
 void EventLoop::ReadEventfd() {
   uint64_t val;
- int res =read(_event_fd, &val, sizeof(val));
- if(res<0)
- {
-  if(errno==EINTR)
-  {
-    return;
+  int res = read(_event_fd, &val, sizeof(val));
+  if (res < 0) {
+    if (errno == EINTR) {
+      return;
+    }
+    // LOG(LogLevel::ERROR)<<"ReadEventfd failed!";
   }
-  //LOG(LogLevel::ERROR)<<"ReadEventfd failed!";
-
- }
 }
 EventLoop::EventLoop()
     : _tid(std::this_thread::get_id()), _event_fd(CreateEventFd()),
-       _event_channel(new Channel(this, _event_fd)),_exit(false) {
+      _event_channel(new Channel(this, _event_fd)), _exit(false),
+      _time_wheel(std::make_unique<TimeWheel>(this)) {
   _event_channel->SetReadCallBack(std::bind(&EventLoop::ReadEventfd, this));
   _event_channel->EnableRead();
 }
@@ -82,15 +83,30 @@ void EventLoop::RunInLoopThread(const Functor &cb) {
 }
 // 将操作压入任务池
 void EventLoop::QueueInLoop(const Functor &cb) {
- { std::unique_lock<std::mutex> _lock(_mutex);
+  {
+    std::unique_lock<std::mutex> _lock(_mutex);
     _tasks.push_back(cb);
- }
- //唤醒任务队列
- Wakeup();
+  }
+  // 唤醒任务队列
+  Wakeup();
 }
 // 用于判断当前线程是否是EventLoop对应的线程;
 bool EventLoop::IsInLoop() { return _tid == std::this_thread::get_id(); }
 // 添加/修改描述符的事件监控
-void EventLoop::UpdateEvent(Channel *channel) {_poller.UpdateChannel(channel);}
+void EventLoop::UpdateEvent(Channel *channel) {
+  _poller.UpdateChannel(channel);
+}
 // 移除描述符的监控
-void EventLoop::RemoveEvent(Channel *channel) {_poller.RemoveChannel(channel);}
+void EventLoop::RemoveEvent(Channel *channel) {
+  _poller.RemoveChannel(channel);
+}
+void EventLoop::TimerAdd(uint64_t id, uint32_t delay, const TaskFunc &cb) {
+  _time_wheel->TimerAddInLoop(id, delay, cb);
+}
+void EventLoop::TimerRefresh(uint64_t id) {
+  _time_wheel->TimerRefreshInLoop(id);
+}
+void EventLoop::TimerCancel(uint64_t id) { _time_wheel->TimerCancelInLoop(id); }
+bool EventLoop::HasTimer(uint64_t id){
+  return  _time_wheel->HasTimer(id);
+}

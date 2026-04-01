@@ -7,10 +7,11 @@
 #include <unistd.h>
 #include <sys/timerfd.h>
 #include <strings.h>
-#include "Channel.hpp"
-#include "EventLoop.hpp"
+
 using TaskFunc = std::function<void()>;
 using ReleaseFunc = std::function<void()>;
+class Channel;
+class EventLoop;
 //任务类
 class TimeTask
 {
@@ -41,20 +42,21 @@ public:
     void TimerCancel(uint64_t id);
     void OnTime();//
     void RunTimerTask();// 秒针滴答
+    bool HasTimer(uint64_t id);
     //将操作压入EventLoop线程中执行，保证线程安全
     void TimerAddInLoop(uint64_t id, uint32_t delay, const TaskFunc &cb);
     void TimerRefreshInLoop(uint64_t id);
     void TimerCancelInLoop(uint64_t id);
 
     private:
-    static void Readtimerfd();
-    static int CreateTimerfd();
+    void Readtimerfd();
+    int CreateTimerfd();
     private:
     int _tick;     // 秒针，释放位置
     int _capacity; // wheel容量
     EventLoop *_loop;
     int _timerfd;
-    std::unique_ptr<Channel> _timerfd_channel;
     std::vector<std::vector<Taskptr>> _wheel;
     std::unordered_map<uint64_t, WeakTask> _timers; // 存储任务
+    std::unique_ptr<Channel> _timerfd_channel;
 };

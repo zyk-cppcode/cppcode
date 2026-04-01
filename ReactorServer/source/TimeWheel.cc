@@ -1,5 +1,7 @@
 #include "TimeWheel.hpp"
 #include "Channel.hpp"
+#include "EventLoop.hpp"
+
 TimeTask::TimeTask(uint64_t id, uint32_t delay, const TaskFunc &cb)
     : _id(id), _timeout(delay), _cbtask(cb) {}
 TimeTask::~TimeTask() {
@@ -15,7 +17,7 @@ uint32_t TimeTask::DelayTime() { return _timeout; }
 
 //////////////////////////////////////////////////////////////////////////////
 // TimeWheel实现
-static int CreateTimerfd() {
+int TimeWheel::CreateTimerfd() {
   int fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
   struct itimerspec howlong;
   bzero(&howlong, sizeof(howlong));
@@ -24,10 +26,23 @@ static int CreateTimerfd() {
   timerfd_settime(fd, 0, &howlong, nullptr);
   return fd;
 }
+void TimeWheel::Readtimerfd(){
+   char buf[1024] = {0};
+  int res=read(_timerfd,buf,sizeof(buf));
+  if(res<0)
+  {
+    LOG(LogLevel::ERROR)<<"Readtimerfd failed";
+    //abort();
+  }
+}
 // void TimeWheel::RunTimerTask() {}
 TimeWheel::TimeWheel(EventLoop *loop)
-    : _tick(0), _capacity(60), _loop(loop), _wheel(_capacity),
-      _timerfd(CreateTimerfd()), _timerfd_channel(new Channel(_loop, _timerfd)) {
+    : _tick(0),
+     _capacity(60),
+      _loop(loop),
+      _timerfd(CreateTimerfd()),
+      _wheel(_capacity),
+     _timerfd_channel(new Channel(_loop, _timerfd)) {
   _timerfd_channel->SetReadCallBack(std::bind(&TimeWheel::OnTime, this));
   _timerfd_channel->EnableRead();
 }
@@ -92,4 +107,11 @@ void TimeWheel::RunTimerTask() {
 void TimeWheel::OnTime() {
   Readtimerfd();
   RunTimerTask();
+}
+bool TimeWheel::HasTimer(uint64_t id){
+  auto it = _timers.find(id);
+  if (it == _timers.end()) {
+    return false; // 没找着定时任务，没法刷新，没法延迟
+  }
+  return true;
 }

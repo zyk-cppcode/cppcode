@@ -8,7 +8,9 @@ SRC_COMMON = ../source/Buffer.cc \
              ../source/Channel.cc \
              ../source/Poller.cc \
              ../source/Socket.cc \
-			 ../source/EventLoop.cc
+			 ../source/EventLoop.cc \
+			 ../source/TimeWheel.cc
+
 
 all: server client
 
