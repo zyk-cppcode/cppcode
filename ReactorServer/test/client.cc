@@ -20,10 +20,10 @@ int main() {
       break;
     }
     char buf[1024] = {0};
-    std::cout << "===================" << std::endl;
+    
 
     ssize_t recv_len = cli_sock.Recv(buf, sizeof(buf) - 1);
-    std::cout << recv_len << std::endl;
+    //std::cout << recv_len << std::endl;
     if (recv_len <= 0) {
       std::cout << "接收失败，连接断开！" << std::endl;
       break;
@@ -31,8 +31,8 @@ int main() {
     std::cout << "Received: " << buf << std::endl;
     sleep(1);
   }
-  while (1)
-    sleep(1);
+  
+    sleep(15);
   return 0;
 }
 // int main() {

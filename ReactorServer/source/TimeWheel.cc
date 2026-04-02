@@ -108,10 +108,11 @@ void TimeWheel::OnTime() {
   Readtimerfd();
   RunTimerTask();
 }
+//查找任务在不在定时器里
 bool TimeWheel::HasTimer(uint64_t id){
   auto it = _timers.find(id);
   if (it == _timers.end()) {
-    return false; // 没找着定时任务，没法刷新，没法延迟
+    return false; // 没找着定时任务、
   }
   return true;
 }

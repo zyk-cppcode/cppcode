@@ -1,4 +1,5 @@
 // #include "../source/Socket.hpp"
+#include <cstdint>
 #include <iostream>
 
 #include "../source/Channel.hpp"
@@ -14,7 +15,8 @@
 
 
 void HandleClose(Channel *channel) {
-  std::cout << "close fd: " << channel->Fd() << std::endl;
+  LOG(LogLevel::INFO)<< "close fd: " << channel->Fd();
+  //std::cout << "close fd: " << channel->Fd() << std::endl;
   channel->Remove();   // 先从epoll移除
   close(channel->Fd());     // 关闭fd
   //delete channel;           // 释放channel
@@ -35,8 +37,8 @@ void HandleRead(Channel *channel) {
     HandleClose(channel);
     return;
   }
-
-  std::cout << "recv from " << fd << " : " << buf << std::endl;
+  LOG(LogLevel::INFO)<< "recv from " << fd << " : " << buf;
+  //std::cout << "recv from " << fd << " : " << buf << std::endl;
   // 收到数据后触发发送
   channel->EnableWrite();
 }
@@ -60,7 +62,7 @@ void HandleError(Channel *channel) {
 }
 
 void HandleEvent(EventLoop*loop,Channel *channel,int id) {
-  loop->TimerRefresh(id);
+ // loop->TimerRefresh(id);
   
 }
 
@@ -71,8 +73,8 @@ void Acceptor(EventLoop*loop, Channel *lst_channel) {
   int listen_fd = lst_channel->Fd();
   int newfd = accept(listen_fd, nullptr, nullptr);
   if (newfd < 0) return;
-  int id=rand();
-  std::cout << "新连接：" << newfd << std::endl;
+  uint64_t id=rand()%1000;
+  std::cout << "新连接：" << newfd <<" id="<<id<< std::endl;
 
   Channel *channel = new Channel(loop, newfd);
   channel->SetReadCallBack(std::bind(HandleRead, channel));
@@ -80,8 +82,8 @@ void Acceptor(EventLoop*loop, Channel *lst_channel) {
   channel->SetCloseCallBack(std::bind(HandleClose, channel));
   channel->SetErrorCallBack(std::bind(HandleError, channel));
   channel->SetEventCallBack(std::bind(HandleEvent, loop,channel,id));
-  channel->EnableRead();
   loop->TimerAdd(id, 10, std::bind(HandleClose, channel));
+  channel->EnableRead();
 }
 
 int main() {
