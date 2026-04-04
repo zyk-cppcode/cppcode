@@ -92,6 +92,11 @@ void EventLoop::QueueInLoop(const Functor &cb) {
 }
 // 用于判断当前线程是否是EventLoop对应的线程;
 bool EventLoop::IsInLoop() { return _tid == std::this_thread::get_id(); }
+// 断言当前线程是EventLoop对应的线程
+void EventLoop::AssertInLoopThread(){
+  assert(_tid == std::this_thread::get_id() );
+ }
+  
 // 添加/修改描述符的事件监控
 void EventLoop::UpdateEvent(Channel *channel) {
   _poller.UpdateChannel(channel);

@@ -87,6 +87,19 @@ void Buffer::read(char* buf, uint64_t len) {
     std::copy(getReadOffset(), getReadOffset() + len, buf);
     moveReadOffset(len);
 }
+void Buffer::read(std::string& buf, uint64_t len){
+     if (len > getReadableSize()) {
+        std::cout << "可读数据不够" << std::endl;
+        return;
+    }
+    
+    buf=std::string(getReadOffset(), len);
+   // std::copy(getReadOffset(), getReadOffset() + len, buf.begin());
+    //std::cout<<"msg:"<<buf<<std::endl;
+
+    moveReadOffset(len);
+}
+
 //清空缓冲区
 void Buffer::clear() {
     _writeOffset = 0;

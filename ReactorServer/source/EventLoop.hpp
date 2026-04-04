@@ -8,6 +8,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <assert.h>
 using Functor = std::function<void()>;
 class TimeWheel;
 
@@ -22,6 +23,8 @@ public:
   void RunInLoopThread(const Functor &cb); // 判断将要执行的任务是否处于当前线程中，如果是则执行，不是则压入队列。
   void QueueInLoop(const Functor &cb); // 将操作压入任务池
   bool IsInLoop(); // 用于判断当前线程是否是EventLoop对应的线程;
+  void AssertInLoopThread(); // 断言当前线程是EventLoop对应的线程;
+
   void UpdateEvent(Channel *channel); // 添加/修改描述符的事件监控
   void RemoveEvent(Channel *channel); // 移除描述符的监控
    void TimerAdd(uint64_t id, uint32_t delay, const TaskFunc &cb);

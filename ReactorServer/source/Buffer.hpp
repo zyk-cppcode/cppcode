@@ -20,7 +20,7 @@ public:
     uint64_t getReadableSize();
 
     char& operator[](int index);
-// 移动读偏移
+    // 移动读偏移
     void moveReadOffset(uint64_t size);
     // 移动写偏移
     void moveWriteOffset(uint64_t size);
@@ -36,6 +36,8 @@ public:
     void write(std::string str);
     // 读取数据
     void read(char* buf, uint64_t len);
+    void read(std::string& buf, uint64_t len);
+
     void clear();
 
 private:
