@@ -1,5 +1,5 @@
 #include "Connection.hpp"
-#include "../logger.hpp"
+#include "logger.hpp"
 #include "Buffer.hpp"
 #include "Channel.hpp"
 #include "EventLoop.hpp"

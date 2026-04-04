@@ -1,6 +1,8 @@
+#pragma once
+
 #include "Channel.hpp"
 #include "common.cpp"
-#include "../logger.hpp"
+#include "logger.hpp"
 #include "Poller.hpp"
 #include <functional>
 #include <memory>

@@ -1,16 +1,10 @@
-// #include "../source/Socket.hpp"
-#include <cstdint>
-#include <iostream>
 
+#include "../source/Acceptor.hpp"
 #include "../source/Channel.hpp"
-#include "../source/Poller.hpp"
-#include "../source/Socket.hpp"
-#include "../logger.hpp"
+#include "../source/logger.hpp"
 #include "../source/Buffer.hpp"
-
 #include "../source/Connection.hpp"
 #include "../source/EventLoop.hpp"
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -104,7 +98,8 @@
 
 //   return 0;
 // }
-
+    EventLoop loop;
+int conn_id = 1;
 // 收到客户端消息的回调
 void OnMessage(const std::shared_ptr<Connection>& conn, Buffer* buf) {
     std::string msg;
@@ -129,9 +124,9 @@ void OnClosed(const std::shared_ptr<Connection>& conn) {
 }
 
 // 新连接到达
-void OnNewConnection(EventLoop* loop, int client_fd) {
-    static int conn_id = 1;
-    auto conn = std::make_shared<Connection>(conn_id++, client_fd, loop);
+void OnNewConnection(int client_fd) {
+ 
+    auto conn = std::make_shared<Connection>(conn_id++, client_fd, &loop);
 
     conn->SetMessageCallback(OnMessage);
     conn->SetConnectedCallback(OnConnected);
@@ -142,22 +137,18 @@ void OnNewConnection(EventLoop* loop, int client_fd) {
 
 int main() {
     EnableConsoleLogStrategy();
-    EventLoop loop;
-
-    // 监听 8888 端口（和你客户端一致）
-    Socket listen_sock;
-    listen_sock.CreateServer(8888);
-
-    Channel accept_channel(&loop, listen_sock.Fd());
-    accept_channel.SetReadCallBack([&]() {
-        int client_fd = accept(listen_sock.Fd(), nullptr, nullptr);
-        if (client_fd >= 0) {
-            OnNewConnection(&loop, client_fd);
-        }
-    });
-    accept_channel.EnableRead();
+    
+    Acceptor acceptor(&loop, 8888); // 创建Acceptor监听端口
+        // // 监听 8888 端口
+        // Socket listen_sock;
+        // listen_sock.CreateServer(8888);
+    acceptor.SetAcceptCallBack(std::bind(OnNewConnection, std::placeholders::_1));
 
     LOG(LogLevel::INFO)<< "服务器启动，监听 8888 端口...";
+    while(1){
     loop.Loop();
+
+    }
+   
     return 0;
 }

@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../logger.hpp"
+#include "logger.hpp"
 
 Socket::Socket() : _sockfd(-1) {}
 Socket::Socket(int sockfd) : _sockfd(sockfd) {}
