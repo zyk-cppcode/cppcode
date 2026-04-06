@@ -6,6 +6,7 @@
 #include "../source/LoopThread.hpp"
 #include "../source/Connection.hpp"
 #include "../source/EventLoop.hpp"
+#include "../source/LoopThreadPool.hpp"
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -23,15 +24,12 @@
 //         delete channel;
 //     });
 // }
-
 // void HandleRead(Channel *channel) {
-
 //   int fd = channel->Fd();
 //   if(fd<0)
 //   return;
 //   char buf[1024] = {0};
 //   ssize_t ret = recv(fd, buf, 1023, 0);
-
 //   if (ret <= 0) {
 //     HandleClose(channel);
 //     return;
@@ -41,27 +39,20 @@
 //   // 收到数据后触发发送
 //   channel->EnableWrite();
 // }
-
 // void HandleWrite(Channel *channel) {
 //   int fd = channel->Fd();
 //   const char *data = "你好吗";
 //   ssize_t ret = send(fd, data, strlen(data), MSG_NOSIGNAL);
-
 //   if (ret < 0) {
 //     HandleClose(channel);
 //     return;
 //   }
-
 //   // 发送完关闭写事件，避免一直触发
 //   channel->DisableWrite();
 // }
-
 // void HandleError(Channel *channel) {
 //   HandleClose(channel);
 // }
-
-
-
 // // ==============================
 // // 新连接回调
 // // ==============================
@@ -71,14 +62,12 @@
 //   if (newfd < 0) return;
 //   uint64_t id=rand()%1000;
 //   std::cout << "新连接：" << newfd <<" id="<<id<< std::endl;
-
 //   Connection *conn = new Connection(newfd,listen_fd,loop);
 //   conn->SetMessageCallback(std::bind());
 //   conn->SetConnectedCallback(std::bind());
 //   conn->SetClosedCallback(std::bind());
 //   conn->SetEventCallback(std::bind());
 // }
-
 // int main() {
 //   EnableConsoleLogStrategy();
 //   std::cout << "========= 服务器启动 ==========" << std::endl;
@@ -86,20 +75,17 @@
 //   Socket lst_sock;
 //   lst_sock.CreateServer(8888);
 //   std::cout << "===================" << std::endl;
-
 //   Channel channel(&loop, lst_sock.Fd());
 //   channel.SetReadCallBack(std::bind(Acceptor, &loop, &channel));
 //   channel.EnableRead();
-  
 //   while (1) {
 //   std::cout << "=========inloop==========" << std::endl;
-
 //     loop.Loop();
 //   }
-
 //   return 0;
 // }
-std::vector<LoopThread> threads(3);
+
+LoopThreadPool *pool;
 int conn_id = 1;
 // 收到客户端消息的回调
 void OnMessage(const std::shared_ptr<Connection>& conn, Buffer* buf) {
@@ -129,7 +115,7 @@ void OnNewConnection(int client_fd) {
     int threadnum=1;
     threadnum=(threadnum+1)%2;
     
-    auto conn = std::make_shared<Connection>(conn_id++, client_fd, threads[threadnum].GetLoop());
+    auto conn = std::make_shared<Connection>(conn_id++, client_fd, pool->GetNextLoop());
 
     conn->SetMessageCallback(OnMessage);
     conn->SetConnectedCallback(OnConnected);
@@ -141,17 +127,10 @@ void OnNewConnection(int client_fd) {
 int main() {
     EnableConsoleLogStrategy();
     EventLoop main_loop;
+    pool = new LoopThreadPool(&main_loop);
     Acceptor acceptor(&main_loop, 8888); // 创建Acceptor监听端口
-        // // 监听 8888 端口
-        // Socket listen_sock;
-        // listen_sock.CreateServer(8888);
     acceptor.SetAcceptCallBack(std::bind(OnNewConnection, std::placeholders::_1));
-
     LOG(LogLevel::INFO)<< "服务器启动，监听 8888 端口...";
-   while(1)
-   {
     main_loop.Loop();
-   }
-   
     return 0;
 }

@@ -12,7 +12,8 @@ SRC_COMMON = ../source/Buffer.cc \
 			 ../source/TimeWheel.cc \
 			 ../source/Connection.cc \
 			 ../source/Acceptor.cc \
-			 ../source/LoopThread.cc
+			 ../source/LoopThread.cc \
+			 ../source/LoopThreadPool.cc 
 
 
 all: server client

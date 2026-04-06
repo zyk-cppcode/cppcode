@@ -1,3 +1,4 @@
+#pragma once
 #include "EventLoop.hpp"
 #include <condition_variable>
 #include <mutex>

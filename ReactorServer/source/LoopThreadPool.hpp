@@ -1,3 +1,4 @@
+#pragma once
 #include "EventLoop.hpp"
 #include "LoopThread.hpp"
 class LoopThreadPool{
