@@ -13,13 +13,14 @@ SRC_COMMON = ../source/Buffer.cc \
 			 ../source/Connection.cc \
 			 ../source/Acceptor.cc \
 			 ../source/LoopThread.cc \
-			 ../source/LoopThreadPool.cc 
+			 ../source/LoopThreadPool.cc \
+			 ../source/TcpServer.cc 
 
 
 all: server client
 
 # 编译 server
-server: server.cc $(SRC_COMMON)
+server: Tcpserver.cc $(SRC_COMMON)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 # 编译 client

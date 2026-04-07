@@ -249,7 +249,9 @@ void Connection::SetClosedCallback(const ClosedCallback &cb) {
 void Connection::SetEventCallback(const AnyEventCallback &cb) {
   _event_callback = cb;
 }
-
+void Connection::SetServerClosedCallback(const ClosedCallback &cb) {
+  _server_closed_callback = cb;
+}
 
 //连接建立就绪后，进行channel回调设置,启动读监控,调用_connected_cal1back
 void Connection::Established() {

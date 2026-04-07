@@ -19,7 +19,7 @@ bool Socket::Create() {
     LOG(LogLevel::ERROR) << "create socket error";
     return false;
   }
-  LOG(LogLevel::INFO) << "create socket success";
+  //LOG(LogLevel::INFO) << "create socket success";
   return true;
 }
 // 绑定地址和端口
@@ -35,7 +35,7 @@ bool Socket::Bind(uint16_t port, const char *ip) {
     LOG(LogLevel::ERROR) << "bind socket error";
     return false;
   }
-  LOG(LogLevel::INFO) << "bind socket success";
+  //LOG(LogLevel::INFO) << "bind socket success";
   return true;
 }
 // 连接服务器
@@ -50,7 +50,7 @@ bool Socket::Connect(const char *ip, uint16_t port) {
     LOG(LogLevel::ERROR) << "connect socket error";
     return false;
   }
-  LOG(LogLevel::INFO) << "connect socket success";
+  //LOG(LogLevel::INFO) << "connect socket success";
   return true;
 }
 // 监听连接
@@ -60,14 +60,14 @@ bool Socket::Listen() {
     LOG(LogLevel::ERROR) << "listen socket error";
     return false;
   }
-  LOG(LogLevel::INFO) << "listen success";
+  //LOG(LogLevel::INFO) << "listen success";
   return true;
 }
 // 获取新链接
 int Socket::Accept() {
   int newfd = ::accept(_sockfd, NULL, NULL);
   if (newfd >= 0) {
-    LOG(LogLevel::INFO) << "新客户端连接，fd=" << newfd;
+   // LOG(LogLevel::INFO) << "新客户端连接，fd=" << newfd;
     return newfd;
   }
 
@@ -88,7 +88,7 @@ bool Socket::CreateServer(uint16_t port, const char *ip) {
     return false;
   if (!Listen())
     return false;
-  LOG(LogLevel::INFO) << "create server success";
+  //LOG(LogLevel::INFO) << "create server success";
   return true;
 }
 // 创建一个客户端套接字（测试）
@@ -128,7 +128,7 @@ bool Socket::setReuseAddr() {
     LOG(LogLevel::ERROR) << "set reuse addr error";
     return false;
   }
-  LOG(LogLevel::INFO) << "set reuse addr success";
+  //LOG(LogLevel::INFO) << "set reuse addr success";
   return true;
 }
 // 设置非阻塞

@@ -5,7 +5,7 @@
 
 Channel::Channel(EventLoop *evlp, int fd)
     : _fd(fd), _events(0), _revents(0), _evlp(evlp) {
-  LOG(LogLevel::INFO) << "channel create success!";
+  //LOG(LogLevel::INFO) << "channel create success!";
 }
 
 Channel::~Channel() { Remove(); }

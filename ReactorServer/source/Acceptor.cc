@@ -18,7 +18,7 @@ void Acceptor::HandleRead(){
         LOG(LogLevel::ERROR) << "accept error";
         return;
     }
-     LOG(LogLevel::INFO) << "accept success, newfd=" << newfd;
+     //LOG(LogLevel::INFO) << "accept success, newfd=" << newfd;
      if(newfd >= 0 && _accept_callback){
          _accept_callback(newfd);
      }

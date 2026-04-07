@@ -51,13 +51,14 @@ public:
   void SetMessageCallback(const MessageCallback &cb);
   void SetClosedCallback(const ClosedCallback &cb);
   void SetEventCallback(const AnyEventCallback &cb);
+  void SetServerClosedCallback(const ClosedCallback &cb);
   int Fd();//获取管理的文件描述符
   int Id();//获取连接ID
   bool Connected();//是否处于CONNECTED状态
   void Setcontext(const Any&context);//设置上下文--连接建立完成时进行调用
   Any *Getcontext();//获取上下文，返回指针
-//连接建立就绪后，进行channe1回调设置,启动读监控,调用_connected_cal1back
-void Established() ;
+//连接建立就绪后，进行channel回调设置,启动读监控,调用_connected_cal1back
+void Established();
 void Send(char *data,size_t len);//发送数据，将数据放到发送缓冲区，启动写事件监控
 void Shutdown();//提供给组件使用者的关闭接口--并不实际关闭，需要判断有没有数据待处理
 void EnableInactiveRelease(int sec);//启动非活跃销毁,并定义多长时间无通信就是非活跃,添加定时任务

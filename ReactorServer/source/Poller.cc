@@ -13,7 +13,7 @@ Poller::Poller() {
     LOG(LogLevel::ERROR) << "epoll create error";
     abort();
   }
-  LOG(LogLevel::DEBUG) << "epoll create success!";
+  //LOG(LogLevel::DEBUG) << "epoll create success!";
 }
 // 更新Channel的事件
 void Poller::UpdateChannel(Channel *channel) {
