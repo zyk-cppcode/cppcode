@@ -100,6 +100,25 @@ void Buffer::read(std::string& buf, uint64_t len){
     moveReadOffset(len);
 }
 
+std::string Buffer::GetLine() {
+    
+    const char* crlf = "\r\n";
+    const char* begin = getReadOffset();
+    const char* end = begin + getReadableSize();
+
+    const char* pos = std::search(begin, end, crlf, crlf + 2);
+
+    if (pos != end) {
+        // ✅ 整行返回，包含 \r\n，不裁剪！
+        std::string line(begin, pos + 2);  
+        moveReadOffset((pos - begin) + 2);
+        return line;
+    }
+
+    // 没找到一行 → 返回空串
+    return "";
+}
+
 //清空缓冲区
 void Buffer::clear() {
     _writeOffset = 0;

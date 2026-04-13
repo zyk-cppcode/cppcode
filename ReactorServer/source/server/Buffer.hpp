@@ -37,7 +37,7 @@ public:
     // 读取数据
     void read(char* buf, uint64_t len);
     void read(std::string& buf, uint64_t len);
-
+    std::string GetLine();
     void clear();
 
 private:
