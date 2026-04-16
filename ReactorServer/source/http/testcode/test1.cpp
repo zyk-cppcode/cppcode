@@ -13,7 +13,7 @@
 
 int main()
 {
-    EnableConsoleLogStrategy();
+     EnableConsoleLogStrategy();
     Socket cli_sock;
     cli_sock.CreateClient(8111, "127.0.0.1");
     std::string req = "GET /hello.txt HTTP/1.1\r\nConnection: keep-alive\r\nContent-Length: 0\r\n\r\n";
