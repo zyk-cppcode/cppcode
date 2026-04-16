@@ -55,8 +55,8 @@ public:
   int Fd();//获取管理的文件描述符
   int Id();//获取连接ID
   bool Connected();//是否处于CONNECTED状态
-  void Setcontext(const Any&context);//设置上下文--连接建立完成时进行调用
-  Any *Getcontext();//获取上下文，返回指针
+  void SetContext(const Any&context);//设置上下文--连接建立完成时进行调用
+  Any *GetContext();//获取上下文，返回指针
 //连接建立就绪后，进行channel回调设置,启动读监控,调用_connected_cal1back
 void Established();
 void Send(char *data,size_t len);//发送数据，将数据放到发送缓冲区，启动写事件监控

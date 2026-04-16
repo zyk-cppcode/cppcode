@@ -66,6 +66,8 @@ public:
 
     // 读取文件内容到 Buffer
     static bool readFileToBuffer(const std::string& path, Buffer* buf);
+    //读取到 string
+    static bool readFile(const std::string& path, std::string* content);
 
     // ------------------------------ 6. 响应构造工具 ------------------------------
     // 快速构造错误响应

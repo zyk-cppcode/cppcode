@@ -15,17 +15,20 @@ typedef enum {
 class HttpContext{
     public:
     HttpContext() ;
-    const HttpRequest& getRequest() const ;
-    bool parseRequest(Buffer* buf);
-    bool gotAll() const;
-    void reset();//
-    HttpRequest& getRequest();
+    const HttpRequest& GetRequest() const ;//获取解析出来的请求
+    bool ParseRequest(Buffer* buf);//解析请求，返回是否成功
+    bool GotAll() const;//是否解析完成
+    void Reset();//
+    int GetResponseStatu() const { return _resp_statu; }
+    void SetResponseStatu(int statu) { _resp_statu = statu; }
+    HttpRequestParseState GetState() const;
+    HttpRequest& GetRequest();//
     private:
-    bool parseRequestLine(Buffer *buf);
-    bool parseHeaders(Buffer *bufx);
-    bool parseBody(Buffer *buf);
+    bool ParseRequestLine(Buffer *buf);//解析请求行
+    bool ParseHeaders(Buffer *bufx);   //解析请求头
+    bool ParseBody(Buffer *buf);       //解析请求体
     private:
-    int _resp_statu; //响应状态码
+    int _resp_statu = 200; //响应状态码
     HttpRequestParseState _state;  // 解析状态
     HttpRequest _request;          // 解析出来的请求
 };

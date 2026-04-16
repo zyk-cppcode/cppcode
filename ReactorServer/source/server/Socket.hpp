@@ -25,9 +25,9 @@ public:
   bool CreateServer(uint16_t port, const char *ip = "0.0.0.0");
   // 创建一个客户端套接字（测试）
   bool CreateClient(uint16_t port, const char *ip);
-  // 发送数据
-  ssize_t Recv(void *buf, size_t len, int flags = 0);
   // 接收数据
+  ssize_t Recv(void *buf, size_t len, int flags = 0);
+  // 发送数据
   ssize_t Send(const void *buf, size_t len, int flags = 0);
   // 关闭套接字
   void Close();

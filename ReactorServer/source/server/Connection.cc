@@ -9,7 +9,7 @@
 #include <sys/types.h>
 
 
-// 描述符可读事件触发后调用的函数，接收socket数据放到接收缓冲区中，然后调用_message_ca11
+// 描述符可读事件触发后调用的函数，接收socket数据放到接收缓冲区中，然后调用_message_call
 void Connection::HandleRead() {
   // 接收socket数据放到接收缓冲区中
   char buf[65535];
@@ -230,11 +230,11 @@ bool Connection::Connected() {
   return _statu == CONNECTED;
 }
 // 设置上下文--连接建立完成时进行调用
-void Connection::Setcontext(const Any &context) {
+void Connection::SetContext(const Any &context) {
   _context=context;
 }
 // 获取上下文，返回指针
-Any*  Connection::Getcontext() {
+Any*  Connection::GetContext() {
   return &_context;
 }
 void Connection::SetConnectedCallback(const ConnectedCallback &cb) {

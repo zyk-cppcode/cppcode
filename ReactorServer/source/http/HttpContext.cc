@@ -1,37 +1,41 @@
 #include "HttpContext.hpp"
 
 HttpContext::HttpContext() : _state(kParseRequestLine) {}
-bool HttpContext::gotAll() const {
+bool HttpContext::GotAll() const {
   return _state == kGotAll;
 }
-void HttpContext::reset() {
+void HttpContext::Reset() {
+  _resp_statu = 200;
   _state = kParseRequestLine;
   _request.Reset();
 }
-HttpRequest& HttpContext::getRequest() {
+HttpRequest& HttpContext::GetRequest() {
   return _request;
 }
-const HttpRequest& HttpContext::getRequest() const {
+const HttpRequest& HttpContext::GetRequest() const {
   return _request;
 }
-bool HttpContext::parseRequest(Buffer* buf) {
+HttpRequestParseState HttpContext::GetState() const{
+    return _state;
+}
+bool HttpContext::ParseRequest(Buffer* buf) {
   while (true) {
     switch (_state) {
       case kParseRequestLine:
-        if (!parseRequestLine(buf)) return false; 
+        if (!ParseRequestLine(buf)) return false; 
         break;
       case kExpectHeaders:
-        if (!parseHeaders(buf)) return false;
+        if (!ParseHeaders(buf)) return false;
         break;
       case kExpectBody:
-        if (!parseBody(buf)) return false;
+        if (!ParseBody(buf)) return false;
         break;
       case kGotAll:
         return true;
     }
   }
 }
-bool HttpContext::parseRequestLine(Buffer *buf) {
+bool HttpContext::ParseRequestLine(Buffer *buf) {
   // 获取一行数据
   std::string line = buf->GetLine();
   if (line.empty())return false; // 数据不足一行，等待更多数据
@@ -83,7 +87,7 @@ bool HttpContext::parseRequestLine(Buffer *buf) {
   return true;
 }
 
-bool HttpContext::parseHeaders(Buffer *buf) {
+bool HttpContext::ParseHeaders(Buffer *buf) {
   while (true) {
     std::string line = buf->GetLine();
     if (line.empty()) {
@@ -117,7 +121,7 @@ bool HttpContext::parseHeaders(Buffer *buf) {
   return true;
 }
 
-bool HttpContext::parseBody(Buffer *buf) {
+bool HttpContext::ParseBody(Buffer *buf) {
   // 1. 获取 Content-Length 请求头，确定请求体长度
   std::string contentLengthStr = _request.GetHeader("Content-Length");
   if (contentLengthStr.empty()) {

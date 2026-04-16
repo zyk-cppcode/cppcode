@@ -17,7 +17,7 @@ void EventLoop::ReadEventfd() {
     if (errno == EINTR) {
       return;
     }
-    // LOG(LogLevel::ERROR)<<"ReadEventfd failed!";
+    LOG(LogLevel::ERROR)<<"ReadEventfd failed!";
   }
 }
 EventLoop::EventLoop()

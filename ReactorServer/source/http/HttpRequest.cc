@@ -21,7 +21,7 @@ void HttpRequest::SetVersion(const std::string& version) {
 }
 void HttpRequest::SetBody(const std::string &body) { _body = body; }
 
-HttpMethod HttpRequest::GetMethod() const { return _method; }
+std::string HttpRequest::GetMethod() const { return HttpMethodtoString(_method); }
 const std::string &HttpRequest::GetUrl() const { return _url; }
 
 const std::string &HttpRequest::GetPath() const { return _path; }
@@ -40,12 +40,25 @@ std::string HttpRequest::GetHeader(const std::string &key) const {
 }
 const std::string &HttpRequest::GetBody() const { return _body; }
 
+//判断是否存在指定头部字段
+bool HttpRequest::HasHeader(const std::string &key)const {
+    return _headers.find(key) != _headers.end();
+}
 void HttpRequest::Reset() {
     _method = HttpMethod::UNKNOWN;
     _url.clear();
     _path.clear();
-    _version.clear();
+    _version="HTTP/1.1";
     _query.clear();
     _headers.clear();
     _body.clear();
+}
+
+//判断是否是短链接
+bool HttpRequest::Close() {
+    // 没有Connection字段，或者有Connection但是值是close，则都是短链接，否则就是长连接
+    if (HasHeader("Connection") == true && GetHeader("Connection") == "keep-alive") {
+        return false;
+    }
+    return true;
 }

@@ -1,4 +1,5 @@
 #include "HttpUtil.hpp"
+#include <cstddef>
 
 // ------------------------------ 1. 字符串工具 ------------------------------
 // 去除字符串首尾空格、制表符、回车、换行
@@ -303,7 +304,7 @@ bool HttpUtil::readFileToBuffer(const std::string &path, Buffer *buf) {
   buf->ensureWriteSize(fileSize);
   size_t readsize = read(fd, buf->getWriteOffset(), fileSize);
   
-  if (readsize == -1) {
+  if (readsize == (size_t)-1) {
     close(fd);
     return false;
   }
@@ -311,9 +312,33 @@ bool HttpUtil::readFileToBuffer(const std::string &path, Buffer *buf) {
   close(fd);
   return true;
 }
+    //读取到 string
+bool HttpUtil::readFile(const std::string& path, std::string* content){
+  // 检查文件是否存在
+  if (!fileExists(path)) {
+    return false;
+  }
+  // 判断是否是普通文件
+  if (!isRegularFile(path)) {
+    return false;
+  }
+  // 打开文件
+  int fd = open(path.c_str(), O_RDONLY);
+  if (fd == -1) {
+    return false;
+  }
+  off_t fileSize = getFileSize(path);
+  content->resize(fileSize);
+  size_t readsize = read(fd, content->data(), fileSize);
+  
+  if (readsize == (size_t)-1) {
+    close(fd);
+    return false;
+  }
+  close(fd);
+  return true;
+}
 // ------------------------------ 6. 响应构造工具 ------------------------------
 // 快速构造错误响应
 // void HttpUtil::makeErrorResponse(int code, const std::string& msg,
 // muduo::net::HttpResponse* resp){} 
-int main()
-{}

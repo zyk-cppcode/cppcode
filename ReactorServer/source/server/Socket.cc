@@ -88,7 +88,7 @@ bool Socket::CreateServer(uint16_t port, const char *ip) {
     return false;
   if (!Listen())
     return false;
-  //LOG(LogLevel::INFO) << "create server success";
+  LOG(LogLevel::INFO) << "create server success";
   return true;
 }
 // 创建一个客户端套接字（测试）
@@ -99,14 +99,13 @@ bool Socket::CreateClient(uint16_t port, const char *ip) {
     return false;
   return true;
 }
-// 发送数据
+// 接收数据
 ssize_t Socket::Recv(void *buf, size_t len, int flags) {
   ssize_t ret = recv(_sockfd, buf, len, flags);
   if (ret < 0)
     return -1;
   return ret;
 }
-// 接收数据
 ssize_t Socket::Send(const void *buf, size_t len, int flags) {
   ssize_t ret = send(_sockfd, buf, len, flags);
   if (ret < 0)
@@ -128,7 +127,7 @@ bool Socket::setReuseAddr() {
     LOG(LogLevel::ERROR) << "set reuse addr error";
     return false;
   }
-  //LOG(LogLevel::INFO) << "set reuse addr success";
+  LOG(LogLevel::INFO) << "set reuse addr success";
   return true;
 }
 // 设置非阻塞
