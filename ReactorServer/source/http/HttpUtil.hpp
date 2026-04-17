@@ -68,6 +68,10 @@ public:
     static bool readFileToBuffer(const std::string& path, Buffer* buf);
     //读取到 string
     static bool readFile(const std::string& path, std::string* content);
+    // 将 Buffer 内容写入文件
+    static bool writeBufferToFile(const std::string& path, const Buffer& buf);
+    // 将 string 内容写入文件
+    static bool writeFile(const std::string& path, const std::string& content);
 
     // ------------------------------ 6. 响应构造工具 ------------------------------
     // 快速构造错误响应

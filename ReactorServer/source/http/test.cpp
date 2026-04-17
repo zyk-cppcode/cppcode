@@ -25,11 +25,11 @@ void Login(const HttpRequest &req, HttpResponse &rsp)
 {
     rsp.SetContent(RequestStr(req), "text/plain");
 }
-// void PutFile(const HttpRequest &req, HttpResponse *rsp) 
-// {
-//     std::string pathname = "./static" + req.GetPath();
-//     Util::WriteFile(pathname, req.GetBody());
-// }
+void PutFile(const HttpRequest &req, HttpResponse &rsp) 
+{
+    std::string pathname = "./static" + req.GetPath();
+    HttpUtil::writeFile(pathname, req.GetBody());
+}
 void DelFile(const HttpRequest &req, HttpResponse &rsp) 
 {
     rsp.SetContent(RequestStr(req), "text/plain");
@@ -39,15 +39,15 @@ int main()
     EnableConsoleLogStrategy();
     LOG(LogLevel::DEBUG)<<"Starting HTTP Server on port 8111...";
     HttpServer server(8111);
-    server.SetEnableInactiveRelease(false);
+    server.SetEnableInactiveRelease(true);
+    server.SetTimeout(10); // 设置超时时间为10秒
     server.SetThreadNum(2);
     server.SetBaseDir("./static");
     server.Get("/hello.txt", Hello);
     server.Post("/login", Login);
-    //server.Put("/1234.txt", PutFile);
     server.Delete("/1234.txt", DelFile);
-    // server.Put("/file", PutFile);
-    // server.Delete("/file", DelFile);
+    server.Put("/big", PutFile);
+    server.Delete("/file", DelFile);
     //LOG(LogLevel::DEBUG)<<"Base directory: "<<server.GetBaseDir();
     server.Start();
     return 0;

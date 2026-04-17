@@ -338,6 +338,16 @@ bool HttpUtil::readFile(const std::string& path, std::string* content){
   close(fd);
   return true;
 }
+// 将 string 内容写入文件
+bool HttpUtil::writeFile(const std::string& path, const std::string& content){
+    int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd == -1) {
+        return false;
+    }
+    size_t writesize = write(fd, content.data(), content.size());
+    close(fd);
+    return writesize == content.size();
+}
 // ------------------------------ 6. 响应构造工具 ------------------------------
 // 快速构造错误响应
 // void HttpUtil::makeErrorResponse(int code, const std::string& msg,

@@ -20,8 +20,9 @@ void Connection::HandleRead() {
     if (err == EAGAIN || err == EWOULDBLOCK || err == EINTR) {
       return;
     }
-    LOG(LogLevel::ERROR) << "Recv failed, errno=" << err;
+    LOG(LogLevel::ERROR) << "Recv failed, errno=" << err<<"fd:"<<_sockfd;
     ShutdownInLoop();
+    return;
   } else if (ret == 0) {
     // 对端关闭连接，必须关闭
     LOG(LogLevel::DEBUG) << "Peer closed connection";
@@ -267,11 +268,11 @@ void Connection::Shutdown() {
 }
 void Connection::EnableInactiveRelease(int sec) {
   // 实现启动非活跃销毁的逻辑
-  _loop->RunInLoopThread(std::bind(&Connection::EnableInactiveReleaseInLoop, this, sec));
+  _loop->RunInLoopThread(std::bind(&Connection::EnableInactiveReleaseInLoop, shared_from_this(), sec));
 }
 void Connection::CancelInactiveRelease() {
   // 实现取消非活跃销毁的逻辑
-  _loop->RunInLoopThread(std::bind(&Connection::CancelInactiveReleaseInLoop, this));
+  _loop->RunInLoopThread(std::bind(&Connection::CancelInactiveReleaseInLoop, shared_from_this()));
 }
 //切换协议---重置上下文以及阶段性处理函数
 void Connection::Upgrade(const Any&context,

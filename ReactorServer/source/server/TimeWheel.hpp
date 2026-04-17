@@ -20,6 +20,7 @@ class TimeTask
 public:
 TimeTask(uint64_t id, uint32_t delay, const TaskFunc &cb);
  ~TimeTask();
+ void Run();
  void Cancel();
  void SetRelease(const ReleaseFunc &cb);
  uint32_t DelayTime();

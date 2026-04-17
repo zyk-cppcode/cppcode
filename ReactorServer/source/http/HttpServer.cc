@@ -11,6 +11,9 @@ HttpServer::HttpServer(int port, int timeout):_server(port)
     _server.SetConnectedCallback(std::bind(&HttpServer::onConnected,this,std::placeholders::_1));
     _server.SetMessageCallback(std::bind(&HttpServer::onMessage,this,std::placeholders::_1,std::placeholders::_2));
 }
+    void HttpServer::SetTimeout(int timeout){
+    _server.SetTimeout(timeout);
+    }
 
 void HttpServer::SetBaseDir(const std::string &path) {
     _basedir = path;
@@ -185,7 +188,7 @@ if (conn->Connected())
 }
 //
 void HttpServer::onMessage(const PtrConnection &conn, Buffer *buffer) {
-    std::cout<<"onMessage"<<std::endl;
+    LOG(LogLevel::DEBUG)<<"onMessage";
     //获取上下文，进行消息处理
     HttpContext *context=conn->GetContext()->get<HttpContext>();
     //解析请求
@@ -222,3 +225,14 @@ void HttpServer::onMessage(const PtrConnection &conn, Buffer *buffer) {
     }
 }
 
+// void HttpServer::onMessage(const PtrConnection &conn, Buffer *buffer) {
+//     // 只清空缓冲区，不解析、不路由、不回复
+//     buffer->clear();
+//     HttpContext *context=conn->GetContext()->get<HttpContext>();
+//     // 构造一个最简单的响应
+//     HttpResponse resp(200);
+//     resp.SetBody("ok");
+//     resp.SetHeader("Content-Length", "2");
+//     WriteReponse(conn, context->GetRequest(), resp);
+//     context->Reset();
+// }

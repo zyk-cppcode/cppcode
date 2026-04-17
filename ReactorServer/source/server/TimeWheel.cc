@@ -4,12 +4,20 @@
 
 TimeTask::TimeTask(uint64_t id, uint32_t delay, const TaskFunc &cb)
     : _id(id), _timeout(delay), _cbtask(cb) {}
-TimeTask::~TimeTask() {
-  if (!_canceled) {
-    _cbtask();
-  }
-  _release();
-}
+    void TimeTask:: Run() {
+        if (!_canceled) {
+            _cbtask();
+        }
+        _release();
+    }
+
+   TimeTask:: ~TimeTask() {}
+// TimeTask::~TimeTask() {
+//   if (!_canceled) {
+//     _cbtask();
+//   }
+//   _release();
+// }
 void TimeTask::Cancel() { _canceled = true; }
 
 void TimeTask::SetRelease(const ReleaseFunc &cb) { _release = cb; }
@@ -101,7 +109,14 @@ void TimeWheel::TimerCancelInLoop(uint64_t id) {
 // 秒针滴答
 void TimeWheel::RunTimerTask() {
   _tick = (_tick + 1) % _capacity;
-  _wheel[_tick].clear(); // 清空指定位置的数组，释放shared_ptr
+  //_wheel[_tick].clear(); // 清空指定位置的数组，释放shared_ptr
+  auto tasks = std::move(_wheel[_tick]); // 拿出来
+
+for (auto& task : tasks) {
+    if (task) {
+        task->Run();   // ✅ 在生命周期内执行
+    }
+}
 }
 
 void TimeWheel::OnTime() {
