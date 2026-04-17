@@ -20,6 +20,7 @@ class HttpServer{
     void Put(const std::string &path, Handler handler);    
     void Delete(const std::string &path, Handler handler);  
     void SetThreadNum(int num);//设置线程数量
+    void SetTimeout(int timeout);//设置超时时间
     void SetEnableInactiveRelease(bool enable=true);//是否启用非活动连接释放
     void Start(); //
     private:

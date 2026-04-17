@@ -20,11 +20,11 @@ char* Buffer::getWriteOffset() {
 char* Buffer::getReadOffset() {
     return &_buffer[_readOffset];
 }
-// 获取前面空闲的大小（缓冲区尾部空闲空间）
+// 获取前面空闲的大小（写偏移之后）
 uint64_t Buffer::getFrontFreeSize() {
     return _buffer.size() - _writeOffset;
 }
-// 获取后面空闲的大小（缓冲区头部空闲空间）
+// 获取后面空闲的大小（读偏移之前）
 uint64_t Buffer::getRearFreeSize() {
     return _readOffset;
 }
@@ -64,8 +64,7 @@ void Buffer::ensureWriteSize(uint64_t size) {
         _writeOffset = getReadableSize();
         _readOffset = 0;
     } else {
-        _buffer.resize(_buffer.size() + size -
-                       (getFrontFreeSize() + getRearFreeSize()));
+        _buffer.resize(_buffer.size() + size );
     }
 }
 // 写入数据

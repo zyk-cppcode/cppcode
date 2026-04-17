@@ -1,14 +1,17 @@
-# 项目根目录绝对路径
-ROOT_DIR = $(shell cd ../.. && pwd)
-# 源文件列表
-SRCS = test1.cpp \
-	$(ROOT_DIR)/server/Socket.cc
-# 目标文件
-TARGET = test
+CXX = g++
+CXXFLAGS = -std=c++17 -g -Wall
+INCLUDES = -I../.. -I../../server -I../../http
 
-# 编译规则
-$(TARGET): $(SRCS)
-	g++ $(SRCS) -o $(TARGET)
+# 所有源码（一次性编译，不生成 .o）
+SRC = test6.cpp \
+      ../../server/Socket.cc \
+      ../../server/Buffer.cc \
+      ../../http/HttpUtil.cc
+
+# 只生成可执行文件，无中间文件
+all:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRC) -o test6
+
 # 清理
 clean:
-	g++ $(SRCS) -o $(TARGET)
+	rm -f test6
