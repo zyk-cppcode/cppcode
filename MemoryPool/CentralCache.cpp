@@ -18,19 +18,22 @@ Span *CentralCache::FetchOneSpan(SpanList &list, size_t size) {
   list._mtx.unlock();
   // 没有非空，从 pagecache 获取span
   // PageCache::GetInstance()->_pageMtx.lock();
-  PageCache::GetInstance()->GetMutex().lock();
+  //PageCache::GetInstance()->GetMutex().lock();
   Span *span = PageCache::GetInstance()->GetSpan(SizeClass::NumMovePage(size));
+   //std::cout<<"get "<<size<<" bytes"<<std::endl;
+   span->_isUsing=true;
+   span->_objsize=size;
   // PageCache::GetInstance()->_pageMtx.unlock();
-  PageCache::GetInstance()->GetMutex().unlock();
-
+  //PageCache::GetInstance()->GetMutex().unlock();
+ 
   assert(span != nullptr);
+ 
   // 分割
   // 获取 span 起始地址
   char *start = (char *)(span->_pageid * PAGE_SIZE);
   // 从 pagecache 获取的内存大小
   size_t bytes = span->_page_num * PAGE_SIZE;
   char *end = start + bytes;
-
   span->_freeList = start;
   start += size;
   void *tail = span->_freeList;
@@ -46,8 +49,7 @@ Span *CentralCache::FetchOneSpan(SpanList &list, size_t size) {
   return span;
 }
 // 获取一批freelist
-size_t CentralCache::FetchRangeObj(void *&start, void *&end, size_t batchNum,
-                                   size_t size) {
+size_t CentralCache::FetchRangeObj(void *&start, void *&end, size_t batchNum,size_t size) {
   size_t index = SizeClass::Index(size);
   //    std::cout << "size = " << size << ", index = " << index << std::endl;
   //    std::cout << "index = " << index
@@ -71,4 +73,42 @@ size_t CentralCache::FetchRangeObj(void *&start, void *&end, size_t batchNum,
   NextObj(end) = nullptr;
   _spanLists[index]._mtx.unlock();
   return getNum;
+}
+
+//释放的内存放入 centralcache
+void CentralCache::ReleaseListToCentralCache(void *start,size_t size)
+{
+
+  size_t index = SizeClass::Index(size);
+  _spanLists[index]._mtx.lock();
+  
+  while(start)
+  {
+    void* next = NextObj(start);
+
+    Span* span=PageCache::GetInstance()->AddrToSpan(start);
+    NextObj(start) = span->_freeList;
+		span->_freeList = start;
+		span->_use_num--;
+
+    if(span->_use_num == 0)
+    {
+      // 回收span
+      _spanLists[index].Erase(span);
+			span->_freeList = nullptr;
+			span->_next = nullptr;
+			span->_prev = nullptr;
+      //_spanLists[index]._mtx.unlock();
+      //PageCache::GetInstance()->GetMutex().lock();
+      //std::cout<<"release "<<size<<" bytes"<<std::endl;
+      PageCache::GetInstance()->ReleaseSpanToPageCache(span);
+      //PageCache::GetInstance()->GetMutex().unlock();
+      //_spanLists[index]._mtx.lock();
+      break;
+    }
+    start = next;
+
+  }
+  _spanLists[index]._mtx.unlock();
+  //std::cout<<"release "<<size<<" bytes"<<std::endl;
 }

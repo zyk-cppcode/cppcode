@@ -15,11 +15,13 @@ class CentralCache{
 
     Span *FetchOneSpan(SpanList& list, size_t size);//获取一个非空span
     size_t FetchRangeObj(void*& start, void*& end, size_t batchNum, size_t size);//获取一批span
+    //释放的内存放入 centralcache
+    void ReleaseListToCentralCache(void *start,size_t size);
     private:
 	SpanList _spanLists[NFREELIST];
 
 private:
-	CentralCache(){ std::cout << "CentralCache 构造完成" << std::endl;}
+	CentralCache(){ }
 
 	CentralCache(const CentralCache&) = delete;
 

@@ -72,11 +72,16 @@ void TestObjectPool()
 void* Alloc1(void* arg)
 {
     cout << "线程 1 开始运行" << endl;
-    for (size_t i = 0; i < 5; ++i)
+	std::vector<void*> ptrs;
+    for (size_t i = 0; i < 50000; ++i)
     {
-        void* ptr = ConcurrentAlloc(6);
-        cout << "线程1 申请 6字节：ptr = " << ptr << endl;
+        void* ptr = ConcurrentAlloc(60);
+        //cout << "线程1 申请 6字节：ptr = " << ptr << endl;
+		ptrs.push_back(ptr); 
     }
+	for (void* p : ptrs) {
+            ConcurrentFree(p);
+        }
     return nullptr;
 }
 
@@ -84,11 +89,16 @@ void* Alloc1(void* arg)
 void* Alloc2(void* arg)
 {
     cout << "线程 2 开始运行" << endl;
-    for (size_t i = 0; i < 5; ++i)
+	std::vector<void*> ptrs;
+    for (size_t i = 0; i < 50000; ++i)
     {
-        void* ptr = ConcurrentAlloc(7);
-        cout << "线程2 申请 7字节：ptr = " << ptr << endl;
+        void* ptr = ConcurrentAlloc(700);
+        //cout << "线程2 申请 7字节：ptr = " << ptr << endl;
+		ptrs.push_back(ptr); 
     }
+	for (void* p : ptrs) {
+            ConcurrentFree(p);
+        }
     return nullptr;
 }
 
@@ -104,13 +114,42 @@ void TLSTest()
 
     // 等待线程结束
     pthread_join(t1, nullptr);
+    cout << "线程 1 结束运行" << endl;
+
     pthread_join(t2, nullptr);
+    cout << "线程 2 结束运行" << endl;
+
 }
 
+void* Alloc()
+{
+    cout << "开始运行" << endl;
+	std::vector<void*> ptrs;
+    for (size_t i = 0; i < 500000; ++i)
+    {
+        void* ptr = ConcurrentAlloc(600);
+        //cout << "线程1 申请 6字节：ptr = " << ptr << endl;
+		ptrs.push_back(ptr); 
+    }
+	for (void* p : ptrs) {
+            ConcurrentFree(p);
+        }
+    return nullptr;
+}
+
+void testbig()
+{
+	  void* ptr = ConcurrentAlloc(257*1024);
+	  ConcurrentFree(ptr);
+
+	  void* p2 = ConcurrentAlloc(129 * 8 * 1024);
+	  ConcurrentFree(p2);
+}
 int main()
 {
-    
-    TLSTest();
+    //Alloc();
+    //testbig();
+	TLSTest();
     
     return 0;
-}
+}   
