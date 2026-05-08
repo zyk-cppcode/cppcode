@@ -175,7 +175,9 @@ void Connection::EnableInactiveReleaseInLoop(int sec) {
   else
   {
     //如果没有，就添加
-    _loop->TimerAdd(_conn_id,sec,std::bind(&Connection::ReleaseInLoop,this));
+    //_loop->TimerAdd(_conn_id,sec,std::bind(&Connection::ReleaseInLoop,this));
+    _loop->TimerAdd(_conn_id, sec, std::bind(&Connection::ReleaseInLoop, shared_from_this()));
+
   }
 
 }
@@ -194,7 +196,8 @@ void Connection::UpgradeInLoop(const Any &context,
                                const MessageCallback &msg,
                                const ClosedCallback &closed,
                                const AnyEventCallback &event) {
-  _context=&context;
+  //_context=&context;
+  _context=context;
   _connected_callback=conn;
   _message_callback=msg;
   _closed_callback=closed;
@@ -216,7 +219,7 @@ Connection::Connection(int conn_id, int sockfd, EventLoop *loop)
   _out_buffer = new Buffer();
 }
 Connection::~Connection() {
-  LOG(LogLevel::DEBUG) << "Connection destructed, conn_id=" << _conn_id;
+  //LOG(LogLevel::DEBUG) << "Connection destructed, conn_id=" << _conn_id;
 }
 // 获取管理的文件描述符
 int Connection::Fd() {

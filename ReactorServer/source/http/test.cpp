@@ -39,8 +39,8 @@ int main()
     EnableConsoleLogStrategy();
     LOG(LogLevel::DEBUG)<<"Starting HTTP Server on port 8111...";
     HttpServer server(8111);
-    server.SetEnableInactiveRelease(true);
-    server.SetTimeout(10); // 设置超时时间为10秒
+    server.SetEnableInactiveRelease(false);
+    //server.SetTimeout(10); // 设置超时时间为10秒
     server.SetThreadNum(2);
     server.SetBaseDir("./static");
     server.Get("/hello.txt", Hello);

@@ -188,9 +188,14 @@ if (conn->Connected())
 }
 //
 void HttpServer::onMessage(const PtrConnection &conn, Buffer *buffer) {
-    LOG(LogLevel::DEBUG)<<"onMessage";
+    //LOG(LogLevel::DEBUG)<<"onMessage";
     //获取上下文，进行消息处理
     HttpContext *context=conn->GetContext()->get<HttpContext>();
+    if(context==nullptr)
+    {
+        LOG(LogLevel::ERROR)<<"HttpContext is null!";
+        return;
+    }
     //解析请求
     context->ParseRequest(buffer);
     //HttpResponse responce(context->GetResponseStatu());
