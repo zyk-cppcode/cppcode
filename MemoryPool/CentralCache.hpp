@@ -3,10 +3,6 @@
 
 class CentralCache{
     public:
-    // static CentralCache* GetInstance()
-	// {
-	// 	return &_sInst;
-	// }
 	static CentralCache* GetInstance()
     {
         static CentralCache instance;   // 线程安全的延迟初始化

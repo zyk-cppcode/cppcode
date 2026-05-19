@@ -2,7 +2,6 @@
 #include "PageCache.hpp"
 #include "common.hpp"
 
-// CentralCache CentralCache::_sInst;
 // 获取一个非空span
 Span *CentralCache::FetchOneSpan(SpanList &list, size_t size) {
   Span *pos = list.Begin();
@@ -11,20 +10,12 @@ Span *CentralCache::FetchOneSpan(SpanList &list, size_t size) {
     if (pos->_freeList != nullptr) {
       return pos;
     }
-    // 是否需要释放空桶？
-    //_spanLists->Erase(pos);
   }
   // 释放桶锁
   list._mtx.unlock();
-  // 没有非空，从 pagecache 获取span
-  // PageCache::GetInstance()->_pageMtx.lock();
-  //PageCache::GetInstance()->GetMutex().lock();
   Span *span = PageCache::GetInstance()->GetSpan(SizeClass::NumMovePage(size));
-   //std::cout<<"get "<<size<<" bytes"<<std::endl;
    span->_isUsing=true;
    span->_objsize=size;
-  // PageCache::GetInstance()->_pageMtx.unlock();
-  //PageCache::GetInstance()->GetMutex().unlock();
  
   assert(span != nullptr);
  
@@ -51,10 +42,7 @@ Span *CentralCache::FetchOneSpan(SpanList &list, size_t size) {
 // 获取一批freelist
 size_t CentralCache::FetchRangeObj(void *&start, void *&end, size_t batchNum,size_t size) {
   size_t index = SizeClass::Index(size);
-  //    std::cout << "size = " << size << ", index = " << index << std::endl;
-  //    std::cout << "index = " << index
-  //           << ", array size = " << sizeof(_spanLists)/sizeof(_spanLists[0])
-  //           << std::endl;
+  
   assert(index < sizeof(_spanLists) / sizeof(_spanLists[0]));
   _spanLists[index]._mtx.lock();
   Span *span = FetchOneSpan(_spanLists[index], size);
@@ -98,17 +86,14 @@ void CentralCache::ReleaseListToCentralCache(void *start,size_t size)
 			span->_freeList = nullptr;
 			span->_next = nullptr;
 			span->_prev = nullptr;
-      //_spanLists[index]._mtx.unlock();
-      //PageCache::GetInstance()->GetMutex().lock();
-      //std::cout<<"release "<<size<<" bytes"<<std::endl;
+      
       PageCache::GetInstance()->ReleaseSpanToPageCache(span);
-      //PageCache::GetInstance()->GetMutex().unlock();
-      //_spanLists[index]._mtx.lock();
+     
       break;
     }
     start = next;
 
   }
   _spanLists[index]._mtx.unlock();
-  //std::cout<<"release "<<size<<" bytes"<<std::endl;
+  
 }

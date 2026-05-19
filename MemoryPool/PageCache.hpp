@@ -6,10 +6,6 @@
 class PageCache
 {
     public:
-        // static PageCache* GetInstance()
-        // {
-        //     return &_sInst;
-        // }
         static PageCache* GetInstance()
     {
         static PageCache instance;   // 线程安全的延迟初始化

@@ -67,29 +67,7 @@ private:
 
 class SizeClass {
 public:
-  // 整体控制在最多10%左右的内碎片浪费
-  // [1,128]					8byte对齐 freelist[0,16)
-  // [128+1,1024]				16byte对齐 freelist[16,72)
-  // [1024+1,8*1024]			128byte对齐	    freelist[72,128)
-  // [8*1024+1,64*1024]		1024byte对齐     freelist[128,184)
-  // [64*1024+1,256*1024]		8*1024byte对齐   freelist[184,208)
-
-  /*size_t _RoundUp(size_t size, size_t alignNum)
-  {
-          size_t alignSize;
-          if (size % alignNum != 0)
-          {
-                  alignSize = (size / alignNum + 1)*alignNum;
-          }
-          else
-          {
-                  alignSize = size;
-          }
-
-          return alignSize;
-  }*/
-  // 1-8
-  static inline size_t _RoundUp(size_t bytes, size_t alignNum) {
+   static inline size_t _RoundUp(size_t bytes, size_t alignNum) {
     return ((bytes + alignNum - 1) & ~(alignNum - 1));
   }
 
@@ -110,18 +88,7 @@ public:
     }
   }
 
-  /*size_t _Index(size_t bytes, size_t alignNum)
-  {
-  if (bytes % alignNum == 0)
-  {
-  return bytes / alignNum - 1;
-  }
-  else
-  {
-  return bytes / alignNum;
-  }
-  }*/
-
+  
   static inline size_t _Index(size_t bytes, size_t align_shift) {
     return ((bytes + (1 << align_shift) - 1) >> align_shift) - 1;
   }
