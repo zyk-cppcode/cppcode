@@ -32,10 +32,11 @@ class FixedLengthMemoryPool
 			_pool += objSize;
 			_left_size -= objSize;
         }
-        return p;
+        return new (p) T();
     }
     void Delete(T* p)
-    {
+    {   if (!p) return;
+        p->~T();//调用析构函数
         *(void**)p = _freelist;//将删除的对象加入空闲链表
         _freelist = p;//更新空闲链表头指针
     }
@@ -44,4 +45,3 @@ private:
     size_t _left_size=0;//剩余内存大小
     void* _freelist=nullptr;//空闲链表头指针
 };
-

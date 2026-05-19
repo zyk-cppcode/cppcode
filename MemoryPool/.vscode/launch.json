@@ -9,7 +9,7 @@
             "name": "Launch",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceRoot}/./test1",
+            "program": "${workspaceRoot}/./test2",
             "args": [],
             "cwd": "${workspaceRoot}"
         }

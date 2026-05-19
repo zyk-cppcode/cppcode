@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string>
-#include <filesystem> // C++17 文件操作
+#include <filesystem> 
 #include <fstream>
 #include <ctime>
 #include <unistd.h>
@@ -62,9 +62,7 @@ inline std::string GetCurrentTime()
     return timebuffer;
 }
 
-///////////////////////////////////////////////////////////////////
-// 1. 刷新的问题 -- 假设我们已经有了一条完整的日志，string->设备(显示器，文件)
-// 基类方法
+
 class LogStrategy
 {
 public:
@@ -144,12 +142,7 @@ private:
     Mutex _lock;
 };
 
-// 网络刷新
 
-////////////////////////////////////////////////////////
-
-// 1. 定制刷新策略
-// 2. 构建完整的日志
 class Logger
 {
 public:
@@ -164,7 +157,7 @@ public:
     {
         _strategy = std::make_unique<FileLogStrategy>();
     }
-    // 形成一条完整日志的方式
+    // 形成一条完整日志
     class LogMessage
     {
     public:
@@ -208,7 +201,7 @@ public:
         std::string _filename;
         int _line;
 
-        std::string _loginfo; // 一条合并完成的，完整的日志信息
+        std::string _loginfo; // 一条完整的日志
         Logger &_logger; // 提供刷新策略的具体做法
     };
     LogMessage operator()(LogLevel level, std::string filename, int line)

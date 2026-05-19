@@ -98,7 +98,7 @@
 // }
 
 Span* PageCache::GetSpan(size_t num) {
-    std::lock_guard<std::mutex> lock(GetMutex());  // 锁只获取一次
+    std::lock_guard<std::mutex> lock(GetMutex());  
     while (true) {
         if (num > NPAGES - 1) {
             // 超大对象直接 mmap
@@ -111,21 +111,16 @@ Span* PageCache::GetSpan(size_t num) {
             span->_page_num = num;
             span->_isUsing = true;
             //_idSpanMap[span->_pageid] = span;
-            _idSpanMap.Ensure(span->_pageid, 1);   // 确保单个页的节点存在
+            _idSpanMap.Ensure(span->_pageid, 1);  
             _idSpanMap.set(span->_pageid, (void*)span);
-            // 最好也加尾页映射：_idSpanMap[span->_pageid + num - 1] = span;
             return span;
         }
 
-        // 1. 先尝试从精确匹配的桶中获取
+        // 1. 先尝试从匹配的桶中获取
         if (!_pagelists[num].Empty()) {
-            //return _pagelists[num].PopFront();
             Span* kspan=_pagelists[num].PopFront();
-    // 建立id和span的映射，方便central cache回收小块内存时，查找对应的span
-        // for (size_t j = 0; j < kspan->_page_num; ++j)
-        // {
-        //     _idSpanMap[kspan->_pageid + j] = kspan;
-        // }
+            kspan->_isUsing = true;
+        // 建立id和span的映射，方便central cache回收小块内存时，查找对应的span
         _idSpanMap.Ensure(kspan->_pageid, kspan->_page_num);
         for (size_t j = 0; j < kspan->_page_num; ++j)
             _idSpanMap.set(kspan->_pageid + j, (void*)kspan);
@@ -181,8 +176,6 @@ Span* PageCache::GetSpan(size_t num) {
         //_idSpanMap[bigSpan->_pageid + bigSpan->_page_num - 1] = bigSpan;
         _idSpanMap.set(bigSpan->_pageid + bigSpan->_page_num - 1, bigSpan);
         _pagelists[NPAGES - 1].PushFront(bigSpan);
-
-        // 不递归，继续 while 循环，下次必然会分割或直接命中
     }
 }
 //根据地址判断是那个 span 的部分
@@ -191,13 +184,6 @@ Span* PageCache::AddrToSpan(void* start)
     std::lock_guard<std::mutex> lock(GetMutex());
     size_t id = (size_t)start/PAGE_SIZE;
     
-	// auto ret = _idSpanMap.find(id);
-	// if (ret != _idSpanMap.end())
-	// {
-    //     //std::cout<<"start="<<start<<" id="<<id<<" found"<<std::endl;
-
-	// 	return ret->second;
-	// }
     Span* span = (Span*)_idSpanMap.get(id);
     if (span != nullptr) return span;
 	else

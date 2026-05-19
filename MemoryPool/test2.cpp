@@ -50,7 +50,6 @@ void* MixTest(void* arg) {
     const size_t per_round = 30000;
 
     cout << "混合线程开始" << endl;
-
     for (size_t round = 0; round < rounds; ++round) {
         std::vector<void*> pts;
         // 分配不同大小的对象（触发多个桶的 Span 分配）
@@ -58,20 +57,19 @@ void* MixTest(void* arg) {
             size_t size = (i % 6 + 1) * 8;  // 8, 16, 24, 32, 40, 48 字节
             pts.push_back(ConcurrentAlloc(size));
         }
-        // 随机释放一部分，再分配一部分（模拟真实负载）
+        //随机释放一部分，再分配一部分（模拟真实负载）
         for (size_t i = 0; i < pts.size(); i += 2) {
             ConcurrentFree(pts[i]);
+            pts[i] = nullptr;
         }
         for (size_t i = 0; i < pts.size() / 2; ++i) {
             pts.push_back(ConcurrentAlloc((i % 6 + 1) * 8));
         }
-        // 全部释放
+        //全部释放
         for (size_t i = 0; i < pts.size(); ++i) {
-            size_t size = (i % 6 + 1) * 8;
-            ConcurrentFree(pts[i]);
+            if (pts[i])ConcurrentFree(pts[i]);
         }
     }
-
     cout << "混合线程完成" << endl;
     return nullptr;
 }
