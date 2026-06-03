@@ -1,0 +1,37 @@
+#include "../source/server/Socket.hpp"
+#include <cstring>
+#include <iostream>
+#include <unistd.h>
+
+int main() {
+  // 1. 创建客户端 socket 并连接服务器
+  Socket cli_sock;
+  if (!cli_sock.CreateClient(8888, "127.0.0.1")) {
+    std::cerr << "连接服务器失败！" << std::endl;
+    return -1;
+  }
+
+  // 2. 循环发送数据并接收响应
+  for (int i = 0; i < 5; i++) {
+    const char *send_str = "hello zyk!";
+    ssize_t send_len = cli_sock.Send(send_str, strlen(send_str));
+    if (send_len <= 0) {
+      std::cerr << "发送失败，连接断开！" << std::endl;
+      break;
+    }
+    char buf[1024] = {0};
+    
+
+    ssize_t recv_len = cli_sock.Recv(buf, sizeof(buf) - 1);
+    //std::cout << recv_len << std::endl;
+    if (recv_len <= 0) {
+      std::cout << "接收失败，连接断开！" << std::endl;
+      break;
+    }
+    std::cout << "Received: " << buf << std::endl;
+    sleep(1);
+  }
+  
+    sleep(15);
+  return 0;
+}
