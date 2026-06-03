@@ -1,0 +1,22 @@
+
+#include "../../server/Socket.hpp"
+#include "../../server/logger.hpp"
+#include <unistd.h>
+#include <assert.h>
+int main()
+{
+    Socket cli_sock;
+    cli_sock.CreateClient(8111, "127.0.0.1");
+    std::string req = "GET /hello.text HTTP/1.1\r\nConnection: keep-alive\r\nContent-Length: 0\r\n\r\n";
+    req += "GET /hello.text HTTP/1.1\r\nConnection: keep-alive\r\nContent-Length: 0\r\n\r\n";
+    req += "GET /hello.text HTTP/1.1\r\nConnection: keep-alive\r\nContent-Length: 0\r\n\r\n";
+    while(1) {
+        assert(cli_sock.Send(req.c_str(), req.size()) != -1);
+        char buf[1024] = {0};
+        assert(cli_sock.Recv(buf, 1023));
+        std::cout<<buf<<std::endl<<std::endl;
+        sleep(3);
+    }
+    cli_sock.Close();
+    return 0;
+}
